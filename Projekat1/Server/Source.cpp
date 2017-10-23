@@ -120,6 +120,24 @@ int main(int argc, char* argv[])
 			(LPSOCKADDR)&clientAddress,
 			&sockAddrLen);
 
+		SOCKET clientSocket = socket(AF_INET,      // IPv4 address famly
+			SOCK_DGRAM,   // datagram socket
+			IPPROTO_UDP); // UDP
+		
+
+		if (iResult > 0)
+		{
+
+			char outgoingBuffer[4];
+			strcpy_s(outgoingBuffer, "Potvrda");
+			iResult = sendto(clientSocket,
+				outgoingBuffer,
+				strlen(outgoingBuffer),
+				0,
+				(LPSOCKADDR)&clientAddress,
+				sockAddrLen);
+		}
+
 		if (iResult == SOCKET_ERROR)
 		{
 			printf("recvfrom failed with error: %d\n", WSAGetLastError());
