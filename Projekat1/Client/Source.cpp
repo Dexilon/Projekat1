@@ -71,6 +71,17 @@ int main(int argc, char* argv[])
 	printf("Message sent to server, press any key to exit.\n");
 	_getch();
 
+	/*SOCKET serverSocket = socket(AF_INET,      // IPv4 address famly
+		SOCK_DGRAM,   // datagram socket
+		IPPROTO_UDP); // UDP
+
+	iResult = recvfrom(serverSocket,
+		accessBuffer,
+		ACCESS_BUFFER_SIZE,
+		0,
+		(LPSOCKADDR)&clientAddress,
+		&sockAddrLen); */
+
 	iResult = closesocket(clientSocket);
 	if (iResult == SOCKET_ERROR)
 	{

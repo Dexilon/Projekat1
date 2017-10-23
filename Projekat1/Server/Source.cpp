@@ -125,18 +125,7 @@ int main(int argc, char* argv[])
 			IPPROTO_UDP); // UDP
 		
 
-		if (iResult > 0)
-		{
 
-			char outgoingBuffer[4];
-			strcpy_s(outgoingBuffer, "Potvrda");
-			iResult = sendto(clientSocket,
-				outgoingBuffer,
-				strlen(outgoingBuffer),
-				0,
-				(LPSOCKADDR)&clientAddress,
-				sockAddrLen);
-		}
 
 		if (iResult == SOCKET_ERROR)
 		{
@@ -153,6 +142,19 @@ int main(int argc, char* argv[])
 		int clientPort = ntohs((u_short)clientAddress.sin_port);
 
 		printf("Client connected from ip: %s, port: %d, sent: %s.\n", ipAddress, clientPort, accessBuffer);
+
+		if (iResult > 0)
+		{
+
+			char outgoingBuffer[] = "Potvrda";
+
+			iResult = sendto(clientSocket,
+				outgoingBuffer,
+				strlen(outgoingBuffer),
+				0,
+				(LPSOCKADDR)&clientAddress,
+				sockAddrLen);
+		}
 
 		// possible server-shutdown logic could be put here
 	}
