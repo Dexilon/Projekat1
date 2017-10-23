@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
 			iResult = sendto(clientSocket,
 				outgoingBuffer,
-				strlen(outgoingBuffer),
+				sizeof(outgoingBuffer),
 				0,
 				(LPSOCKADDR)&clientAddress,
 				sockAddrLen);
