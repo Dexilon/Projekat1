@@ -7,6 +7,8 @@
 #define ACCESS_BUFFER_SIZE 1024
 #define IP_ADDRESS_LEN 16
 
+void SelectFun(SOCKET* listenSocket, int n);
+
 // Initializes WinSock2 library
 // Returns true if succeeded, false otherwise.
 bool InitializeWindowsSockets();
@@ -83,35 +85,7 @@ int main(int argc, char* argv[])
 		// set whole buffer to zero
 		memset(accessBuffer, 0, ACCESS_BUFFER_SIZE);
 
-		// Initialize select parameters
-		FD_SET set;
-		timeval timeVal;
-
-		FD_ZERO(&set);
-		// Add socket we will wait to read from
-		FD_SET(serverSocket, &set);
-
-		// Set timeouts to zero since we want select to return
-		// instantaneously
-		timeVal.tv_sec = 0;
-		timeVal.tv_usec = 0;
-
-		iResult = select(0 /* ignored */, &set, NULL, NULL, &timeVal);
-
-		// lets check if there was an error during select
-		if (iResult == SOCKET_ERROR)
-		{
-			fprintf(stderr, "select failed with error: %ld\n", WSAGetLastError());
-			continue;
-		}
-
-		// now, lets check if there are any sockets ready
-		if (iResult == 0)
-		{
-			// there are no ready sockets, sleep for a while and check again
-			Sleep(SERVER_SLEEP_TIME);
-			continue;
-		}
+		SelectFun(&serverSocket, 1);
 
 		iResult = recvfrom(serverSocket,
 			accessBuffer,
@@ -123,9 +97,6 @@ int main(int argc, char* argv[])
 		SOCKET clientSocket = socket(AF_INET,      // IPv4 address famly
 			SOCK_DGRAM,   // datagram socket
 			IPPROTO_UDP); // UDP
-		
-
-
 
 		if (iResult == SOCKET_ERROR)
 		{
@@ -148,7 +119,9 @@ int main(int argc, char* argv[])
 
 			char outgoingBuffer[] = "Potvrda";
 
-			iResult = sendto(clientSocket,
+			SelectFun(&serverSocket, 0);
+
+			iResult = sendto(serverSocket,
 				outgoingBuffer,
 				sizeof(outgoingBuffer),
 				0,
@@ -190,4 +163,46 @@ bool InitializeWindowsSockets()
 		return false;
 	}
 	return true;
+}
+
+void SelectFun(SOCKET* listenSocket, int n) {
+
+	int iResult;
+	FD_SET set;
+	timeval timeVal;
+
+	do {
+
+		FD_ZERO(&set);
+		// Add socket we will wait to read from
+		FD_SET(*listenSocket, &set);
+
+		// Set timeouts to zero since we want select to return
+		// instantaneously
+		timeVal.tv_sec = 0;
+		timeVal.tv_usec = 0;
+
+		if (n == 1) {
+			//Receive
+			iResult = select(0 /* ignored */, &set, NULL, NULL, &timeVal);
+		}
+		else {
+			iResult = select(0 /* ignored */, NULL, &set, NULL, &timeVal);
+		}
+
+		// lets check if there was an error during select
+		if (iResult == SOCKET_ERROR)
+		{
+			fprintf(stderr, "select failed with error: %ld\n", WSAGetLastError());
+			continue;
+		}
+
+		if (iResult == 0)
+		{
+			// there are no ready sockets, sleep for a while and check again
+			Sleep(50);
+			continue;
+		}
+	} while (iResult != 1);
+
 }
